@@ -10,7 +10,7 @@ Each player has a board segment that consists of 18 playable spaces, 5 Home spac
                    *     *
                  * * *   * * * 
                    *         *
- * * * * * * * * * * * * * * * * * *
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
 The object of the game is for each Team to get their Player's Pegs from their Home to their Castle.
 Moving Pegs is 
