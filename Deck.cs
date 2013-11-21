@@ -91,6 +91,15 @@ public class Deck {
 			length--;
 		}
 	}
+	public void AddCards(List<Cards> _cards){
+		Set.AddRange(_cards);
+	}
+	public Card Draw(){
+		if(Set.Count > 0){
+			return Set.pop();	
+		}
+		return null;
+	}
 	public void PrintCards(){
 		foreach(Card _card in Set){
 			Debug.Log(_card.FaceValue());
