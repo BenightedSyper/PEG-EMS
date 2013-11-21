@@ -19,7 +19,9 @@ Each player has a board segment that consists of 18 playable spaces, 5 Home spac
                       +     0                + = Home
                     + + +   0 0 0            0 = Castle
                       +         0            * = Playable Area
-    O * * * * * * * * * * * * * * * * O      O = Playable Area and connection to other segments
+    # * * * * * * * * O * * * * I * * #      # = Playable Area and connection to other segments
+                                             O = Playable Area and the "Come Out" space
+                                             I = Playable Area and the "Come In" space
   
 Game
 ----
