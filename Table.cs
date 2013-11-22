@@ -44,7 +44,12 @@ public class Table : MonoBehaviour {
 						}
 					}
 					if(GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* _player.Hand.Count, (CARDHEIGHT + CARDBUFFER) * Players.IndexOf(_player),CARDWIDTH,CARDHEIGHT),"Play Card \n" + _player.SelectedCard)){
-						PlayCard(_player, _player.SelectedCard);
+						if(_player.SelectedCard != -1){
+							PlayCard(_player, _player.SelectedCard);
+							_player.SelectedCard = -1;
+						}else{
+							Debug.Log("you must select a card to play");
+						}
 					}
 					GUILayout.EndHorizontal();
 				}
