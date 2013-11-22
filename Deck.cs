@@ -9,7 +9,7 @@ public class Deck {
 		Set = new List<Card>();
 		AddDeck();
 		Shuffle();
-		PrintCards();
+		//PrintCards();
 	}
 	public Deck(int _numberOfDecks){
 		Set = new List<Card>();
@@ -17,7 +17,7 @@ public class Deck {
 			AddDeck();
 		}
 		Shuffle();
-		PrintCards();
+		//PrintCards();
 	}
 	public void AddDeck(){
 		//Diamonds
@@ -91,12 +91,16 @@ public class Deck {
 			length--;
 		}
 	}
-	public void AddCards(List<Cards> _cards){
-		Set.AddRange(_cards);
+	public void AddCards(List<Card> _cards){
+		foreach(Card _card in _cards){
+			Set.Add(_card);
+		}
 	}
 	public Card Draw(){
 		if(Set.Count > 0){
-			return Set.pop();	
+			Card temp = Set[0];
+			Set.RemoveAt(0);
+			return temp;
 		}
 		return null;
 	}

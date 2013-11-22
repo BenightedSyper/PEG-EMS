@@ -20,7 +20,7 @@ public class Card {
 		string faceValue = string.Empty;
 		if(Suit != SUIT.Joker){
 			faceValue += Rank;
-			faceValue += " of ";
+			faceValue += "\n of \n";
 			faceValue += Suit;
 			faceValue += "s";
 			return faceValue;
