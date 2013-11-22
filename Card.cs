@@ -24,6 +24,7 @@ public class Card {
 			faceValue += Suit;
 			faceValue += "s";
 			return faceValue;
+			//♥ ♦ ♣ ♠
 		}else{
 			faceValue += Rank;
 			faceValue += " ";
