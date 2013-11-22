@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 public class Table : MonoBehaviour {
 	
-	private enum PHASE { DRAW, PLAY, MOVE, END }
+	public enum PHASE { DRAW, PLAY, MOVE, END }
+	public enum RULESET { CLASSIC }
 	
 	public float CARDWIDTH = 100f;
 	public float CARDHEIGHT = 50f;
@@ -13,6 +14,7 @@ public class Table : MonoBehaviour {
 	public Deck TableDeck;
 	public List<Player> Players;
 	
+	private RULESET RuleSet;
 	private int TurnCounter;
 	private PHASE PhaseCounter;
 	
@@ -56,6 +58,66 @@ public class Table : MonoBehaviour {
 			}
 		}
 	}
+	//player's turn starts
+	//player draws a card 
+	//player selects a Card to play, or discards
+	//player selects a Peg(s) to move
+	//(player draws or Counts)
+	//player ends turn
+	public void DrawPhase(Player _player){
+		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.DRAW){
+			return;
+		}
+		//player draws a card
+		_player.TakeCard(TableDeck.Draw);
+		//inc the PhaseCounter
+		PhaseCounter = PHASE.PLAY;
+	}
+	public void PlayPhase(Player _player){
+		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.PLAY){
+			return;
+		}
+		//discard selected card
+		_player.Discard.Add(_player.LastDiscarded);
+		_player.LastDiscarded = _player.Hand[_player.SelectedCard];
+		_player.Hand.RemoveAt(_player.SelectedCard);
+		//inc PhaseCounter
+		PhaseCounter = PHASE.MOVE;
+	}
+	public void DiscardPhase(Player _player){
+		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.PLAY){
+			return;
+		}
+		//discard selected card
+		_player.Discard.Add(_player.LastDiscarded);
+		_player.LastDiscarded = _player.Hand[_player.SelectedCard];
+		_player.Hand.RemoveAt(_player.SelectedCard);
+		//Player draws or Counts Depending on rule Set
+		switch(RuleSet){
+		case RULESET.CLASSIC:
+			_player.TakeCard(TableDeck.Draw);
+			break;
+		}
+		//inc PhaseCounter
+		PhaseCounter = PHASE.END;
+	}
+	public void MovePhase(Player _player){
+		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.MOVE){
+			return;
+		}
+		//move logic
+		PhaseCounter = PHASE.END
+	}
+	public void EndPhase(Player _player){
+		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.END){
+			return;
+		}
+		//roll PhaseCounter
+		PhaseCounter = PHASE.DRAW;
+		//roll TurnCounter
+		TurnCounter = (TurnCounter + 1) % Players.Count;
+	}
+	
 	public void NextTurn(){
 		Players[TurnCounter].TakeCard(TableDeck.Draw());
 		TurnCounter = (TurnCounter + 1) % Players.Count;
@@ -73,6 +135,7 @@ public class Table : MonoBehaviour {
 	public void NewGame(/*default is 2v2*/){
 		TurnCounter = 0;
 		PhaseCounter = PHASE.DRAW;
+		P
 		
 		TableDeck = new Deck(2);
 		TableDeck.Shuffle();
