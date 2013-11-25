@@ -75,7 +75,12 @@ public class Table : MonoBehaviour {
 				break;
 			case PHASE.MOVE:
 				//display the available pegs
-				//Players[TurnCounter].SelectedPeg = this Peg
+				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 0, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),PlayersPegs[TurnCounter,0].Name());
+				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 1, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),PlayersPegs[TurnCounter,1].Name());
+				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 2, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),PlayersPegs[TurnCounter,2].Name());
+				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 3, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),PlayersPegs[TurnCounter,3].Name());
+				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 4, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),PlayersPegs[TurnCounter,4].Name());
+				//Players[TurnCounter].SelectedPeg = this Peg || call MovePhase with Peg as a parameter
 				if(GUI.Button(new Rect((Camera.main.pixelWidth / 2) - CARDWIDTH / 2, Camera.main.pixelHeight / 2,CARDWIDTH,CARDHEIGHT),"Move")){
 					MovePhase(Players[TurnCounter]);
 				}
@@ -239,13 +244,15 @@ public class Peg{
 	public int Player;
 	public LOCATION Location;
 	public int Distance;
-	public int BoardSegment;
 	
 	public Peg(int _team, int _player, LOCATION _location, int _distance){
 		Team = _team;
 		Player = _player;
 		Location = _location;
 		Distance = _distance;
+	}
+	public string Name(){
+		return "" + Location + ": " + Distance;
 	}
 }
 public class Board{
@@ -287,6 +294,7 @@ public class Player{
 	public int Counting;
 	public List<Card> Hand;
 	public int SelectedCard;
+	public Peg[5] Pegs;
 	public Peg SelectedPeg;
 	public List<Card> Discard;
 	public Card LastDiscarded;
