@@ -211,13 +211,23 @@ public class Table : MonoBehaviour {
 		}
 	}
 }
+public enum LOCATION { MAINTRACK, HOME, CASTLE }
 public class Peg{
-	public int team;
-	public int player;
-	public Peg(){
+	public int Team;
+	public int Player;
+	public LOCATION Location;
+	public int Distance;
+	public int BoardSegment;
+	
+	public Peg(int _team, int _player, LOCATION _location, int _distance){
+		Team = _team;
+		Player = _player;
+		Location = _location;
+		Distance = _distance;
 	}
 }
 public class Board{
+	/*
 	public Transform[] MainTrackLocations;
 	public Transform[] HomeLocations;
 	public Transform[] CastleLocations;
@@ -233,6 +243,18 @@ public class Board{
 		PegLocations = new int[5 * _players];
 		for(int i = 0; i < PegLocations.Length; i++){
 			PegLocations[i] = i;
+		}
+	}*/
+	public Peg[,] PlayersPegs;
+	
+	public Board(int _players){
+		PlayersPegs = new Pegs[_players, 5]();
+		for(int i = 0; i < _players; i++){
+				PlayerPegs[i,0] = new Peg(Players[i].Team, i, LOCATION.HOME, 0);
+				PlayerPegs[i,1] = new Peg(Players[i].Team, i, LOCATION.HOME, 1);
+				PlayerPegs[i,2] = new Peg(Players[i].Team, i, LOCATION.HOME, 2);
+				PlayerPegs[i,3] = new Peg(Players[i].Team, i, LOCATION.HOME, 3);
+				PlayerPegs[i,4] = new Peg(Players[i].Team, i, LOCATION.HOME, 4);
 		}
 	}
 }
