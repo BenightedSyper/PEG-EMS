@@ -74,6 +74,8 @@ public class Table : MonoBehaviour {
 				}
 				break;
 			case PHASE.MOVE:
+				//display the available pegs
+				//Players[TurnCounter].SelectedPeg = this Peg
 				if(GUI.Button(new Rect((Camera.main.pixelWidth / 2) - CARDWIDTH / 2, Camera.main.pixelHeight / 2,CARDWIDTH,CARDHEIGHT),"Move")){
 					MovePhase(Players[TurnCounter]);
 				}
@@ -148,7 +150,27 @@ public class Table : MonoBehaviour {
 			return;
 		}
 		//move logic
+		//if(!TestPegMovement()){
+		//return;
+		//}
 		PhaseCounter = PHASE.END;
+	}
+	public bool TestPegMove(Peg _peg, int _distance){
+		for(int i = 0; i < Players.Count; i++){
+			//if on main track
+			//check all pegs between starting position and ending position
+			//if any are owned by the same player, return false
+			//check if in Castle
+			
+			/*
+			PlayerPegs[i,0]
+			PlayerPegs[i,1] 
+			PlayerPegs[i,2] 
+			PlayerPegs[i,3] 
+			PlayerPegs[i,4] 
+			*/
+		}
+		return false;
 	}
 	public void EndPhase(Player _player){
 		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.END){
@@ -265,6 +287,7 @@ public class Player{
 	public int Counting;
 	public List<Card> Hand;
 	public int SelectedCard;
+	public Peg SelectedPeg;
 	public List<Card> Discard;
 	public Card LastDiscarded;
 	//board skin
