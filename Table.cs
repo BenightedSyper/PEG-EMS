@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Table : MonoBehaviour {
 	
-	public enum PHASE { DRAW, PLAY, MOVE, END }
+	public enum PHASE { DRAW, PLAY, PEG, MOVE, END }
 	public enum RULESET { CLASSIC }
 	
 	public float CARDWIDTH = 100f;
@@ -73,13 +73,25 @@ public class Table : MonoBehaviour {
 					DiscardPhase(Players[TurnCounter]);
 				}
 				break;
-			case PHASE.MOVE:
+			case PHASE.PEG:
+				List<Peg> tempPegs = GetAvailablePegs(Players[TurnCounter], LastPlayed);
 				//display the available pegs
-				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 0, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),PlayersPegs[TurnCounter,0].Name());
-				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 1, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),PlayersPegs[TurnCounter,1].Name());
-				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 2, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),PlayersPegs[TurnCounter,2].Name());
-				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 3, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),PlayersPegs[TurnCounter,3].Name());
-				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 4, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),PlayersPegs[TurnCounter,4].Name());
+				DisplayPegs(tempPegs);
+				//check the selected card for available pegs
+				//Ace Maintrack Pegs of the player, Castle Pegs, and Home Pegs
+				//2-9 Maintrack Pegs of the player, Castle Pegs (needs logic for 7's and 9's upon moving the last Peg into the castle)
+				//10 All Main Track Pegs + logic for a selected Peg filtering out any Peg from that Player
+				//Jack, Queen, KingMaintrack Pegs of the player and Home Pegs
+				//Joker all Player's Pegs.
+				/*
+				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 0, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),TableBoard.PlayersPegs[TurnCounter,0].Name());
+				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 1, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),TableBoard.PlayersPegs[TurnCounter,1].Name());
+				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 2, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),TableBoard.PlayersPegs[TurnCounter,2].Name());
+				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 3, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),TableBoard.PlayersPegs[TurnCounter,3].Name());
+				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 4, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),TableBoard.PlayersPegs[TurnCounter,4].Name());
+				*/
+				break;
+			case PHASE.MOVE:
 				//Players[TurnCounter].SelectedPeg = this Peg || call MovePhase with Peg as a parameter
 				if(GUI.Button(new Rect((Camera.main.pixelWidth / 2) - CARDWIDTH / 2, Camera.main.pixelHeight / 2,CARDWIDTH,CARDHEIGHT),"Move")){
 					MovePhase(Players[TurnCounter]);
@@ -121,7 +133,7 @@ public class Table : MonoBehaviour {
 		LastPlayed = _player.Hand[_player.SelectedCard];
 		_player.Hand.RemoveAt(_player.SelectedCard);
 		//inc PhaseCounter
-		PhaseCounter = PHASE.MOVE;
+		PhaseCounter = PHASE.PEG;
 	}
 	public void DiscardPhase(Player _player){
 		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.PLAY){
@@ -143,12 +155,38 @@ public class Table : MonoBehaviour {
 			_player.Counting++;
 			if(_player.Counting == 3){
 				//move peg out of player's Home to Come Out space;
+				//Peg select
+				//PhaseCounter = PHASE.PEG
 				_player.Counting = 0;
 			}
 			break;
 		}
 		//inc PhaseCounter
 		PhaseCounter = PHASE.END;
+	}
+	public void PegPhase(Player _player){
+		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.PEG){
+			return;
+		}
+		PhaseCounter = PHASE.MOVE;
+	}
+	public List<Peg> GetAvailablePegs(int _player, Card _card){
+		List<Peg> returnList = new List<Peg>();
+		switch(_card.Rank){
+			case RANK.ACE:
+				foreach(Peg _peg in TableBoard.PlayerPegs[_player]){
+					returnList.Add(_peg);
+				}
+				break;
+		}
+		return returnList;
+	}
+	private void DisplayPegs(List<Peg> _pegs){
+		GUILayout.BeginHorizontal("");
+		foreach(Peg _peg in _pegs){
+			//Peg GUI
+		}
+		GUILayout.EndHorizontal();
 	}
 	public void MovePhase(Player _player){
 		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.MOVE){
@@ -160,7 +198,19 @@ public class Table : MonoBehaviour {
 		//}
 		PhaseCounter = PHASE.END;
 	}
-	public bool TestPegMove(Peg _peg, int _distance){
+	public bool TestPegMove(Peg _peg, Card _card){
+		int beginningPosition;
+		
+		switch(_card.Rank){
+			case RANK.ACE:
+				//can move a peg out of the home
+				//can move a peg 1 forward
+				//can move a peg 11 forward
+				//can move a peg 1 backward (depending on ruleset)
+				break;
+			case RANK.TWO:
+				//can move own peg 2 forward
+		}
 		for(int i = 0; i < Players.Count; i++){
 			//if on main track
 			//check all pegs between starting position and ending position
