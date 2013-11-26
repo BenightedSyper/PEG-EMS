@@ -20,6 +20,8 @@ public class Table : MonoBehaviour {
 	private int TurnCounter;
 	private PHASE PhaseCounter;
 	
+	private float scrollPosition;
+	
 	//RuleSet
 	private int HandSize = 5;
 	private bool DrawFirst = true;
@@ -51,13 +53,13 @@ public class Table : MonoBehaviour {
 				}
 			}*/
 			if(Players[TurnCounter].Hand.Count > 0){
-				GUILayout.BeginHorizontal("");
+				//GUILayout.BeginHorizontal("");
 				foreach(Card _card in Players[TurnCounter].Hand){
 					if(GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* Players[TurnCounter].Hand.IndexOf(_card), CARDBUFFER,CARDWIDTH,CARDHEIGHT),_card.FaceValue())){
 						Players[TurnCounter].SelectedCard = Players[TurnCounter].Hand.IndexOf(_card);
 					}
 				}
-				GUILayout.EndHorizontal();
+				//GUILayout.EndHorizontal();
 			}
 			switch(PhaseCounter){
 			case PHASE.DRAW:
@@ -182,11 +184,13 @@ public class Table : MonoBehaviour {
 		return returnList;
 	}
 	private void DisplayPegs(List<Peg> _pegs){
-		GUILayout.BeginHorizontal("");
+		//GUILayout.BeginHorizontal("");
 		foreach(Peg _peg in _pegs){
 			//Peg GUI
+			scrollPosition = GUI.BeginScrollView(new Rect(10, 300, 100, 100), scrollPosition, new Rect(0, 0, 220, 200));
+			GUI.EndScrollView();
 		}
-		GUILayout.EndHorizontal();
+		//GUILayout.EndHorizontal();
 	}
 	public void MovePhase(Player _player){
 		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.MOVE){
@@ -302,7 +306,7 @@ public class Peg{
 		Distance = _distance;
 	}
 	public string Name(){
-		return "" + Location + ": " + Distance;
+		return "Player: " + Player + "\n" + Location + ": " + Distance;
 	}
 }
 public class Board{
