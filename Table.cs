@@ -18,8 +18,10 @@ public class Table : MonoBehaviour {
 	public Peg FirstPeg;
 	public Peg SecondPeg;
 	
-	private LOCATION MoveToLocation;
-	private int MoveToDistance;
+	private LOCATION MoveToLocationFirst;
+	private int MoveToDistanceFirst;
+	private LOCATION MoveToLocationSecond;
+	private int MoveToDistanceSecond;
 	
 	private RULESET RuleSet;
 	private int TurnCounter;
@@ -27,6 +29,12 @@ public class Table : MonoBehaviour {
 	
 	private Vector2 scrollPosition;
 	public float hSliderValue = 0.0F;
+	public float hSliderSevenValue = 1.0f;
+	public float hSliderNineValue = 1.0f;
+	public float hSliderTenValue = 1.0f;
+	public bool NineToggle = true;
+	public bool TenFirstToggle = true;
+	public bool TenSecondToggle = true;
 	
 	//RuleSet
 	private int HandSize = 5;
@@ -44,25 +52,12 @@ public class Table : MonoBehaviour {
 	
 	void OnGUI(){
 		if(Players.Count > 0){
-			/*foreach(Player _player in Players){
-				if(_player.Hand.Count > 0){
-					GUILayout.BeginHorizontal("");
-					foreach(Card _card in _player.Hand){
-						if(GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* _player.Hand.IndexOf(_card), (CARDHEIGHT + CARDBUFFER) * Players.IndexOf(_player),CARDWIDTH,CARDHEIGHT),_card.FaceValue())){
-							_player.SelectedCard = _player.Hand.IndexOf(_card);
-						}
-					}
-					GUILayout.EndHorizontal();
-				}
-			}*/
 			if(Players[TurnCounter].Hand.Count > 0){
-				//GUILayout.BeginHorizontal("");
 				foreach(Card _card in Players[TurnCounter].Hand){
 					if(GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* Players[TurnCounter].Hand.IndexOf(_card), CARDBUFFER,CARDWIDTH,CARDHEIGHT),_card.FaceValue())){
 						Players[TurnCounter].SelectedCard = Players[TurnCounter].Hand.IndexOf(_card);
 					}
 				}
-				//GUILayout.EndHorizontal();
 			}
 			switch(PhaseCounter){
 			case PHASE.DRAW:
@@ -96,9 +91,20 @@ public class Table : MonoBehaviour {
 				GUI.Button(new Rect((CARDWIDTH + CARDBUFFER)* 4, (CARDBUFFER * 2) + CARDHEIGHT,CARDWIDTH,CARDHEIGHT),TableBoard.PlayersPegs[TurnCounter,4].Name());
 				*/
 				if(GUI.Button(new Rect((Camera.main.pixelWidth / 2) + (CARDBUFFER / 2), Camera.main.pixelHeight / 2,CARDWIDTH,CARDHEIGHT),"Select Peg")){
-					if(FirstPeg != null){
-						PegPhase(Players[TurnCounter]);
+					if(LastPlayed .Rank == RANK.Seven || LastPlayed .Rank == RANK.Nine || LastPlayed .Rank == RANK.Ten){
+						if(FirstPeg != null && SecondPeg != null && FirstPeg != SecondPeg){
+							PegPhase(Players[TurnCounter]);	
+						}else{
+							Debug.Log("You must select 2 different Pegs");
+						}
+					}else{
+						if(FirstPeg != null){
+							PegPhase(Players[TurnCounter]);
+						}
 					}
+				}
+				if(GUI.Button(new Rect(Camera.main.pixelWidth - (CARDWIDTH + CARDBUFFER), Camera.main.pixelHeight - (CARDHEIGHT + CARDBUFFER), CARDWIDTH, CARDHEIGHT), "Back")){
+					Back(Players[TurnCounter]);
 				}
 				break;
 			case PHASE.MOVE:
@@ -107,10 +113,16 @@ public class Table : MonoBehaviour {
 				if(GUI.Button(new Rect((Camera.main.pixelWidth / 2) - CARDWIDTH / 2, Camera.main.pixelHeight / 2,CARDWIDTH,CARDHEIGHT),"Move")){
 					MovePhase(Players[TurnCounter]);
 				}
+				if(GUI.Button(new Rect(Camera.main.pixelWidth - (CARDWIDTH + CARDBUFFER), Camera.main.pixelHeight - (CARDHEIGHT + CARDBUFFER), CARDWIDTH, CARDHEIGHT), "Back")){
+					Back(Players[TurnCounter]);
+				}
 				break;
 			case PHASE.END:
 				if(GUI.Button(new Rect((Camera.main.pixelWidth / 2) - CARDWIDTH / 2, Camera.main.pixelHeight / 2,CARDWIDTH,CARDHEIGHT),"End Turn")){
 					EndPhase(Players[TurnCounter]);
+				}
+				if(GUI.Button(new Rect(Camera.main.pixelWidth - (CARDWIDTH + CARDBUFFER), Camera.main.pixelHeight - (CARDHEIGHT + CARDBUFFER), CARDWIDTH, CARDHEIGHT), "Back")){
+					Back(Players[TurnCounter]);
 				}
 				break;
 			}
@@ -123,6 +135,29 @@ public class Table : MonoBehaviour {
 			if(SecondPeg != null){
 				GUI.Label(new Rect((CARDWIDTH + CARDBUFFER) * 2,Camera.main.pixelHeight - (CARDHEIGHT + CARDBUFFER), CARDWIDTH, CARDHEIGHT + CARDBUFFER),"Second Peg\n" + SecondPeg.Name());
 			}
+		}
+	}
+	public void Back(Player _player){
+		switch(PhaseCounter){
+		case PHASE.PEG:
+			//go back to play phase
+			PhaseCounter = PHASE.PLAY;
+			//return the last played card back into the palyers hand
+			_player.Discard.Remove(_player.LastDiscarded);
+			_player.Hand.Add(_player.LastDiscarded);
+			_player.LastDiscarded = null;//may need more logic to retain the last last discarded
+			LastPlayed = null;
+			FirstPeg = null;
+			SecondPeg = null;
+			break;
+		case PHASE.MOVE:
+			FirstPeg = null;
+			SecondPeg = null;
+			PhaseCounter = PHASE.PEG;
+			break;
+		case PHASE.END:
+			//having a stack of peg states would make this easy
+			break;
 		}
 	}
 	//player's turn starts
@@ -240,6 +275,11 @@ public class Table : MonoBehaviour {
 			break;
 		case RANK.Ten:
 			//more logic needed for selecting 2 different player's pegs
+			/*
+			if(FirstPeg != null){
+				return list with only pegs from other teams
+			}
+			*/
 			if(TableBoard.PlayersPegs[_player,0].Location == LOCATION.MAINTRACK){
 				returnList.Add(TableBoard.PlayersPegs[_player,0]);
 			}
@@ -302,9 +342,21 @@ public class Table : MonoBehaviour {
 		if(TurnCounter != Players.IndexOf(_player) && PhaseCounter != PHASE.MOVE){
 			return;
 		}
-		if(TestPegMove(FirstPeg, MoveToLocation, MoveToDistance)){
-			FirstPeg.Location = MoveToLocation;
-			FirstPeg.Distance = MoveToDistance;
+		//needs logic for which peg is moved first.
+		if(LastPlayed.Rank == RANK.Ten || LastPlayed.Rank == RANK.Nine || LastPlayed.Rank == RANK.Seven){
+			if(TestPegMove(FirstPeg, MoveToLocationFirst, MoveToDistanceFirst)){
+				FirstPeg.Location = MoveToLocationFirst;
+				FirstPeg.Distance = MoveToDistanceFirst;
+			}
+			if(TestPegMove(SecondPeg, MoveToLocationSecond, MoveToDistanceSecond)){
+				SecondPeg.Location = MoveToLocationSecond;
+				SecondPeg.Distance = MoveToDistanceSecond;
+			}
+		}else{
+			if(TestPegMove(FirstPeg, MoveToLocationFirst, MoveToDistanceFirst)){
+				FirstPeg.Location = MoveToLocationFirst;
+				FirstPeg.Distance = MoveToDistanceFirst;
+			}
 		}
 		//move logic
 		//if(!TestPegMovement()){
@@ -319,110 +371,119 @@ public class Table : MonoBehaviour {
 			hSliderValue = 0.0f;
 		}
 	}
+	public void CheckSevenSlider(){
+		hSliderSevenValue = Mathf.FloorToInt(hSliderSevenValue);
+	}
+	public void CheckNineSlider(){
+		hSliderNineValue = Mathf.FloorToInt(hSliderNineValue);
+	}
+	public void CheckTenSlider(){
+		hSliderTenValue = Mathf.FloorToInt(hSliderTenValue);
+	}
 	public void DisplayMove(){
 		string MoveDescription= "";
 		switch(LastPlayed.Rank){
 		case RANK.Ace:
 			MoveDescription = "Player: " + TurnCounter + " played an Ace on Peg: " + FirstPeg.Location + " " + FirstPeg.Distance + "\n";
 			if(FirstPeg.Location == LOCATION.HOME){
-				MoveToLocation = LOCATION.MAINTRACK;
-				MoveToDistance = TableBoard.GetPlayerHomeExit(TurnCounter);
-				MoveDescription += "moving to " + MoveToLocation + " " + MoveToDistance;
+				MoveToLocationFirst = LOCATION.MAINTRACK;
+				MoveToDistanceFirst = TableBoard.GetPlayerHomeExit(TurnCounter);
+				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 			}
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//two options: 1 space and 11 spaces
 				hSliderValue = GUI.HorizontalSlider(new Rect(25, (CARDHEIGHT + CARDBUFFER) * 2, 100, 30), hSliderValue, 0.0F, 1.0F);
 				CheckAceSlider();
-				MoveToLocation = LOCATION.MAINTRACK;
-				MoveToDistance = (FirstPeg.Distance + (hSliderValue > 0 ? 11 : 1))% TableBoard.Length;
-				MoveDescription += "moving to " + MoveToLocation + " " + MoveToDistance;
+				MoveToLocationFirst = LOCATION.MAINTRACK;
+				MoveToDistanceFirst = (FirstPeg.Distance + (hSliderValue > 0 ? 11 : 1))% TableBoard.Length;
+				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& MoveToDistance > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& (MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
+					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
+					&& (MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
 					//give the option to move into the castle
-					MoveToLocation = LOCATION.CASTLE;
-					MoveToDistance = MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter);
+					MoveToLocationFirst = LOCATION.CASTLE;
+					MoveToDistanceFirst = MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter);
 					
 				}
 			}
 			if(FirstPeg.Location == LOCATION.CASTLE){
-				MoveToLocation = LOCATION.CASTLE;
-				MoveToDistance = FirstPeg.Distance + 1;
+				MoveToLocationFirst = LOCATION.CASTLE;
+				MoveToDistanceFirst = FirstPeg.Distance + 1;
 			}
 			break;
 		case RANK.Two:
 			MoveDescription = "Player: " + TurnCounter + " played a Two on Peg: " + FirstPeg.Location + " " + FirstPeg.Distance + "\n";
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
-				MoveToLocation = LOCATION.MAINTRACK;
-				MoveToDistance = (FirstPeg.Distance + 2 )% TableBoard.Length;
-				MoveDescription += "moving to " + MoveToLocation + " " + MoveToDistance;
+				MoveToLocationFirst = LOCATION.MAINTRACK;
+				MoveToDistanceFirst = (FirstPeg.Distance + 2 )% TableBoard.Length;
+				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& MoveToDistance > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& (MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
+					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
+					&& (MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
 					//give the option to move into the castle
-					MoveToLocation = LOCATION.CASTLE;
-					MoveToDistance = MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter);
+					MoveToLocationFirst = LOCATION.CASTLE;
+					MoveToDistanceFirst = MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter);
 				}
 			}
 			if(FirstPeg.Location == LOCATION.CASTLE){
-				MoveToLocation = LOCATION.CASTLE;
-				MoveToDistance = FirstPeg.Distance + 2;
+				MoveToLocationFirst = LOCATION.CASTLE;
+				MoveToDistanceFirst = FirstPeg.Distance + 2;
 			}
 			break;
 		case RANK.Three:
 			MoveDescription = "Player: " + TurnCounter + " played a Three on Peg: " + FirstPeg.Location + " " + FirstPeg.Distance + "\n";
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
-				MoveToLocation = LOCATION.MAINTRACK;
-				MoveToDistance = (FirstPeg.Distance + 3) % TableBoard.Length;
-				MoveDescription += "moving to " + MoveToLocation + " " + MoveToDistance;
+				MoveToLocationFirst = LOCATION.MAINTRACK;
+				MoveToDistanceFirst = (FirstPeg.Distance + 3) % TableBoard.Length;
+				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& MoveToDistance > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& (MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
+					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
+					&& (MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
 					//give the option to move into the castle
-					MoveToLocation = LOCATION.CASTLE;
-					MoveToDistance = MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter);
+					MoveToLocationFirst = LOCATION.CASTLE;
+					MoveToDistanceFirst = MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter);
 				}
 			}
 			if(FirstPeg.Location == LOCATION.CASTLE){
-				MoveToLocation = LOCATION.CASTLE;
-				MoveToDistance = FirstPeg.Distance + 3;
+				MoveToLocationFirst = LOCATION.CASTLE;
+				MoveToDistanceFirst = FirstPeg.Distance + 3;
 			}
 			break;
 		case RANK.Four:
 			MoveDescription = "Player: " + TurnCounter + " played a Four on Peg: " + FirstPeg.Location + " " + FirstPeg.Distance + "\n";
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
-				MoveToLocation = LOCATION.MAINTRACK;
-				MoveToDistance = (FirstPeg.Distance + 4) % TableBoard.Length;
-				MoveDescription += "moving to " + MoveToLocation + " " + MoveToDistance;
+				MoveToLocationFirst = LOCATION.MAINTRACK;
+				MoveToDistanceFirst = (FirstPeg.Distance + 4) % TableBoard.Length;
+				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& MoveToDistance > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& (MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
+					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
+					&& (MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
 					//give the option to move into the castle
-					MoveToLocation = LOCATION.CASTLE;
-					MoveToDistance = MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter);
+					MoveToLocationFirst = LOCATION.CASTLE;
+					MoveToDistanceFirst = MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter);
 				}
 			}
 			if(FirstPeg.Location == LOCATION.CASTLE){
-				MoveToLocation = LOCATION.CASTLE;
-				MoveToDistance = FirstPeg.Distance + 4;
+				MoveToLocationFirst = LOCATION.CASTLE;
+				MoveToDistanceFirst = FirstPeg.Distance + 4;
 			}
 			break;
 		case RANK.Five:
 			MoveDescription = "Player: " + TurnCounter + " played a Five on Peg: " + FirstPeg.Location + " " + FirstPeg.Distance + "\n";
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
-				MoveToLocation = LOCATION.MAINTRACK;
-				MoveToDistance = (FirstPeg.Distance + 5) % TableBoard.Length;
-				MoveDescription += "moving to " + MoveToLocation + " " + MoveToDistance;
+				MoveToLocationFirst = LOCATION.MAINTRACK;
+				MoveToDistanceFirst = (FirstPeg.Distance + 5) % TableBoard.Length;
+				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& MoveToDistance > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& (MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
+					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
+					&& (MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
 					//give the option to move into the castle
-					MoveToLocation = LOCATION.CASTLE;
-					MoveToDistance = MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter);
+					MoveToLocationFirst = LOCATION.CASTLE;
+					MoveToDistanceFirst = MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter);
 				}
 			}
 			break;
@@ -430,64 +491,97 @@ public class Table : MonoBehaviour {
 			MoveDescription = "Player: " + TurnCounter + " played a Six on Peg: " + FirstPeg.Location + " " + FirstPeg.Distance + "\n";
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
-				MoveToLocation = LOCATION.MAINTRACK;
-				MoveToDistance = (FirstPeg.Distance + 6) % TableBoard.Length;
-				MoveDescription += "moving to " + MoveToLocation + " " + MoveToDistance;
+				MoveToLocationFirst = LOCATION.MAINTRACK;
+				MoveToDistanceFirst = (FirstPeg.Distance + 6) % TableBoard.Length;
+				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& MoveToDistance > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& (MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
+					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
+					&& (MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
 					//give the option to move into the castle
-					MoveToLocation = LOCATION.CASTLE;
-					MoveToDistance = MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter);
+					MoveToLocationFirst = LOCATION.CASTLE;
+					MoveToDistanceFirst = MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter);
 				}
 			}
 			break;
-		case RANK.Seven:
+		case RANK.Seven://needs logic for only one playable peg
 			MoveDescription = "Player: " + TurnCounter + " played a Seven on Pegs: " + FirstPeg.Location + " " + FirstPeg.Distance + "and " + SecondPeg + " " + SecondPeg.Distance + "\n";
+			//6 options: 1/6 2/5 3/4 4/3 5/2 6/1
+			hSliderSevenValue = GUI.HorizontalSlider(new Rect(25, (CARDHEIGHT + CARDBUFFER) * 2, 100, 30), hSliderSevenValue, 1.0F, 6.0F);
+			CheckSevenSlider();
 			
+			MoveDescription += "Moving Peg " + FirstPeg.Location + " " + FirstPeg.Distance + " Forward " + (int)hSliderSevenValue + "\n";
+			MoveToDistanceFirst = (FirstPeg.Distance + (int)hSliderSevenValue) % TableBoard.Length;
+			MoveToLocationFirst = LOCATION.MAINTRACK;
+			MoveDescription += "Moving Peg " + SecondPeg.Location + " " + SecondPeg.Distance + " Forward " + (7 - (int)hSliderSevenValue) + "\n";
+			MoveToDistanceSecond = (SecondPeg.Distance + (7 - (int)hSliderSevenValue)) % TableBoard.Length;
+			MoveToLocationFirst = LOCATION.MAINTRACK;
 			break;
 		case RANK.Eight:
 			MoveDescription = "Player: " + TurnCounter + " played an Eight on Peg: " + FirstPeg.Location + " " + FirstPeg.Distance + "\n";
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
-				MoveToLocation = LOCATION.MAINTRACK;
-				MoveToDistance = (FirstPeg.Distance + (TableBoard.Length - 8)) % TableBoard.Length;
-				MoveDescription += "moving to " + MoveToLocation + " " + MoveToDistance;
-				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& MoveToDistance > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& (MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
-					//give the option to move into the castle
-					MoveToLocation = LOCATION.CASTLE;
-					MoveToDistance = MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter);
-				}
+				MoveToLocationFirst = LOCATION.MAINTRACK;
+				MoveToDistanceFirst = (FirstPeg.Distance + (TableBoard.Length - 8)) % TableBoard.Length;
+				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 			}
 			break;
-		case RANK.Nine:
+		case RANK.Nine://needs logic for only one playable peg
 			MoveDescription = "Player: " + TurnCounter + " played a Nine on Pegs: " + FirstPeg.Location + " " + FirstPeg.Distance + "and " + SecondPeg + " " + SecondPeg.Distance + "\n";
+			
+			//16 options: 1/-8 2/-7 3/-6 4/-5 5/-4 6/-3 7/-2 8/-1 -1/8 -2/7 -3/6 -4/5 -5/4 -6/3 -7/2 -8/1 
+			hSliderNineValue = GUI.HorizontalSlider(new Rect(25, (CARDHEIGHT + CARDBUFFER) * 2, 100, 30), hSliderNineValue, 1.0F, 8.0F);
+			CheckNineSlider();
+			
+			//needs logic to check if the the peg moving backwards is not in the Castle
+			NineToggle = GUI.Toggle(new Rect (25, (CARDHEIGHT + CARDBUFFER) * 2 + 30, 100, 30), NineToggle, (NineToggle?"Forward/Backward":"Backward/Forward"));
+			
+			MoveDescription += "Moving Peg " + FirstPeg.Location + " " + FirstPeg.Distance + (NineToggle? " Forward ": " Backwards ") + hSliderNineValue + "\n";
+			MoveToDistanceFirst = FirstPeg.Distance + (NineToggle? (int)hSliderNineValue : -(int)hSliderNineValue );
+			MoveToLocationFirst = LOCATION.MAINTRACK;
+			MoveDescription += "Moving Peg " + SecondPeg.Location + " " + SecondPeg.Distance + (NineToggle? " Backwards ": " Forward ") + (9 - hSliderNineValue) + "\n";
+			MoveToDistanceSecond = SecondPeg.Distance + (NineToggle? -(9 - (int)hSliderNineValue): (9 - (int)hSliderNineValue) );
+			MoveToLocationSecond = LOCATION.MAINTRACK;
+			
 			break;
-		case RANK.Ten:
+		case RANK.Ten://needs logic for only one playable peg
 			MoveDescription = "Player: " + TurnCounter + " played a Ten on Pegs: " + FirstPeg.Location + " " + FirstPeg.Distance + "and " + SecondPeg + " " + SecondPeg.Distance + "\n";
+			
+			//9 options: 1/9 2/8 3/7 4/6 5/5 6/4 7/3 8/2 9/1 
+			//+/+ +/- -/+ -/-
+			hSliderTenValue = GUI.HorizontalSlider(new Rect(25, (CARDHEIGHT + CARDBUFFER) * 2, 100, 30), hSliderTenValue, 1.0F, 9.0F);
+			CheckTenSlider();
+			
+			TenFirstToggle = GUI.Toggle(new Rect (25, (CARDHEIGHT + CARDBUFFER) * 2 + 30, 100, 30), TenFirstToggle, (TenFirstToggle?"Forward":"Backward"));
+			TenSecondToggle = GUI.Toggle(new Rect (25, (CARDHEIGHT + CARDBUFFER) * 2 + 60, 100, 30), TenSecondToggle, (TenSecondToggle?"Forward":"Backward"));
+			
+			MoveDescription += "Moving Peg " + FirstPeg.Location + " " + FirstPeg.Distance + (TenFirstToggle? " Forward " : " Backwards ") + hSliderTenValue + "\n";
+			MoveToDistanceFirst = FirstPeg.Distance + (TenFirstToggle? (int)hSliderTenValue : -(int)hSliderTenValue);
+			MoveToLocationFirst = LOCATION.MAINTRACK;
+			MoveDescription += "Moving Peg " + SecondPeg.Location + " " + SecondPeg.Distance + (TenSecondToggle? " Forward " : " Backwards ") + (10 - hSliderTenValue) + "\n";
+			MoveToDistanceSecond = SecondPeg.Distance + (TenSecondToggle? (10 - (int)hSliderTenValue) : -(10 - (int)hSliderTenValue));
+			MoveToLocationSecond = LOCATION.MAINTRACK;
+			
 			break;
 		case RANK.Jack:
 		case RANK.Queen:
 		case RANK.King:
 			MoveDescription = "Player: " + TurnCounter + " played a " + LastPlayed.Rank + " on Peg: " + FirstPeg.Location + " " + FirstPeg.Distance + "\n";
 			if(FirstPeg.Location == LOCATION.HOME){
-				MoveToLocation = LOCATION.MAINTRACK;
-				MoveToDistance = TableBoard.GetPlayerHomeExit(TurnCounter);
-				MoveDescription += "moving to " + MoveToLocation + " " + MoveToDistance;
+				MoveToLocationFirst = LOCATION.MAINTRACK;
+				MoveToDistanceFirst = TableBoard.GetPlayerHomeExit(TurnCounter);
+				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 			}
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
-				MoveToLocation = LOCATION.MAINTRACK;
-				MoveToDistance = (FirstPeg.Distance + 10) % TableBoard.Length;
-				MoveDescription += "moving to " + MoveToLocation + " " + MoveToDistance;
+				MoveToLocationFirst = LOCATION.MAINTRACK;
+				MoveToDistanceFirst = (FirstPeg.Distance + 10) % TableBoard.Length;
+				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& MoveToDistance > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
-					&& (MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
+					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
+					&& (MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter)) < 5){
 					//give the option to move into the castle
-					MoveToLocation = LOCATION.CASTLE;
-					MoveToDistance = MoveToDistance - TableBoard.GetPlayerCastleEntrance(TurnCounter);
+					MoveToLocationFirst = LOCATION.CASTLE;
+					MoveToDistanceFirst = MoveToDistanceFirst - TableBoard.GetPlayerCastleEntrance(TurnCounter);
 				}
 			}
 			break;
@@ -519,7 +613,8 @@ public class Table : MonoBehaviour {
 		LastPlayed = null;
 		FirstPeg = null;
 		SecondPeg = null;
-		MoveToDistance = -1;
+		MoveToDistanceFirst = -1;
+		MoveToDistanceSecond = -1;
 		
 		//roll PhaseCounter
 		PhaseCounter = PHASE.DRAW;
