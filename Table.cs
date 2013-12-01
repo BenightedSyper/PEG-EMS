@@ -35,6 +35,7 @@ public class Table : MonoBehaviour {
 	public bool NineToggle = true;
 	public bool TenFirstToggle = true;
 	public bool TenSecondToggle = true;
+	public float hSliderJokerValue = 0.0F;
 	
 	//RuleSet
 	private int HandSize = 5;
@@ -317,11 +318,21 @@ public class Table : MonoBehaviour {
 			break;
 		case RANK.Small:
 		case RANK.Big:
-			returnList.Add(TableBoard.PlayersPegs[_player,0]);
-			returnList.Add(TableBoard.PlayersPegs[_player,1]);
-			returnList.Add(TableBoard.PlayersPegs[_player,2]);
-			returnList.Add(TableBoard.PlayersPegs[_player,3]);
-			returnList.Add(TableBoard.PlayersPegs[_player,4]);
+			if(TableBoard.PlayersPegs[_player,0].Location != LOCATION.CASTLE){
+				returnList.Add(TableBoard.PlayersPegs[_player,0]);
+			}
+			if(TableBoard.PlayersPegs[_player,1].Location != LOCATION.CASTLE){
+				returnList.Add(TableBoard.PlayersPegs[_player,1]);
+			}
+			if(TableBoard.PlayersPegs[_player,2].Location != LOCATION.CASTLE){
+				returnList.Add(TableBoard.PlayersPegs[_player,2]);
+			}
+			if(TableBoard.PlayersPegs[_player,3].Location != LOCATION.CASTLE){
+				returnList.Add(TableBoard.PlayersPegs[_player,3]);
+			}
+			if(TableBoard.PlayersPegs[_player,4].Location != LOCATION.CASTLE){
+				returnList.Add(TableBoard.PlayersPegs[_player,4]);
+			}
 			break;
 		}
 		return returnList;
@@ -379,6 +390,9 @@ public class Table : MonoBehaviour {
 	}
 	public void CheckTenSlider(){
 		hSliderTenValue = Mathf.FloorToInt(hSliderTenValue);
+	}
+	public void CheckJokerSlider(){
+		hSliderJokerValue = Mathf.FloorToInt(hSliderJokerValue);
 	}
 	public void DisplayMove(){
 		string MoveDescription= "";
@@ -587,6 +601,14 @@ public class Table : MonoBehaviour {
 			break;
 		case RANK.Small:
 		case RANK.Big:
+			MoveDescription = "Player: " + TurnCounter + " played a Joker on Peg: " + FirstPeg.Location + " " + FirstPeg.Distance + "\n";
+			
+			hSliderJokerValue = GUI.HorizontalSlider(new Rect(25, (CARDHEIGHT + CARDBUFFER) * 2, 100, 30), hSliderJokerValue, 0, TableBoard.Length);
+			CheckJokerSlider();
+			
+			MoveToLocationFirst = LOCATION.MAINTRACK;
+			MoveToDistanceFirst = Mathf.FloorToInt(hSliderJokerValue);
+			MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 			break;
 		}
 		GUI.Label(new Rect(0,CARDHEIGHT + CARDBUFFER, Camera.main.pixelWidth, CARDHEIGHT * 2),MoveDescription);
