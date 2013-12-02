@@ -613,9 +613,45 @@ public class Table : MonoBehaviour {
 		}
 		GUI.Label(new Rect(0,CARDHEIGHT + CARDBUFFER, Camera.main.pixelWidth, CARDHEIGHT * 2),MoveDescription);
 	}
+	public void PegToPlayerHome(Peg _peg){
+		_peg.Location = LOCATION.HOME;
+		_peg.Distance = _peg.Number;
+	}
 	public bool TestPegMove(Peg _peg, LOCATION _location, int _distance){
 		LOCATION beginningLocation = _peg.Location;
 		int beginningDistance = _peg.Distance;
+		
+		//need to check moving distances for valid position
+		if((_location == LOCATION.MAINTRACK && _distance > TableBoard.Length) || (_location == LOCATION.CASTLE && _distance > 4)){
+			//this is outside the play area
+			//should pop and error message
+			Debug.Log("Move to: " + _location + " " + _distance + " is outside the play area, invalide move.");
+			return false;
+		}
+		//need to check the landing location of any pegs that was landed on
+		if(_peg.Location == LOCATION.HOME && _location == LOCATION.MAINTRACK){
+			//check maintrack distance for any other peg
+			for(int i = 0; i < Players.Count; i++){
+				for(int j = 0; j < 5 /*the number of pegs a player has*/; j++){
+					//test each peg to see if its in that spot.
+					if(TableBoard.PlayersPegs[i,j].Location == _location && TableBoard.PlayersPegs[i,j].Distance == _distance){
+						if(_peg.Player == TableBoard.PlayersPegs[i,j].Player){
+							return false;
+						}else{//not same player's pegs
+							if(_peg.Team == TableBoard.PlayersPegs[i,j].Team){//same team
+								return TestPegMove(TableBoard.PlayersPegs[i,j], LOCATION.MAINTRACK, TableBoard.GetPlayerCastleEntrance(i));
+							}else{//not same team
+								PegToPlayerHome(TableBoard.PlayersPegs[i,j]);
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+		//need to check that we are not moving over any of our own pegs.
+		
+		
 		for(int i = 0; i < Players.Count; i++){
 			for(int j = 0; j < 5 /*the number of pegs a player has*/; j++){
 				//test each peg to see if its in that spot.
@@ -689,12 +725,14 @@ public class Table : MonoBehaviour {
 }
 public enum LOCATION { MAINTRACK, HOME, CASTLE }
 public class Peg{
+	public int Number;
 	public int Team;
 	public int Player;
 	public LOCATION Location;
 	public int Distance;
 	
-	public Peg(int _team, int _player, LOCATION _location, int _distance){
+	public Peg(int _number, int _team, int _player, LOCATION _location, int _distance){
+		Number = _number;
 		Team = _team;
 		Player = _player;
 		Location = _location;
@@ -730,11 +768,11 @@ public class Board{
 		Length = 18 * _players;
 		PlayersPegs = new Peg[_players, 5];
 		for(int i = 0; i < _players; i++){
-				PlayersPegs[i,0] = new Peg(1, i, LOCATION.HOME, 0);
-				PlayersPegs[i,1] = new Peg(1, i, LOCATION.HOME, 1);
-				PlayersPegs[i,2] = new Peg(1, i, LOCATION.HOME, 2);
-				PlayersPegs[i,3] = new Peg(1, i, LOCATION.HOME, 3);
-				PlayersPegs[i,4] = new Peg(1, i, LOCATION.HOME, 4);
+				PlayersPegs[i,0] = new Peg(0, 1, i, LOCATION.HOME, 0);
+				PlayersPegs[i,1] = new Peg(1, 1, i, LOCATION.HOME, 1);
+				PlayersPegs[i,2] = new Peg(2, 1, i, LOCATION.HOME, 2);
+				PlayersPegs[i,3] = new Peg(3, 1, i, LOCATION.HOME, 3);
+				PlayersPegs[i,4] = new Peg(4, 1, i, LOCATION.HOME, 4);
 		}
 	}
 	public int GetPlayerHomeExit(int _player){
