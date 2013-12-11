@@ -617,7 +617,7 @@ public class Table : MonoBehaviour {
 		_peg.Location = LOCATION.HOME;
 		_peg.Distance = _peg.Number;
 	}
-	public bool TestPegMove(Peg _peg, LOCATION _location, int _distance){
+	public bool TestPegMoveJoker(Peg _peg, LOCATION _location, int _distance){
 		LOCATION beginningLocation = _peg.Location;
 		int beginningDistance = _peg.Distance;
 		
@@ -625,7 +625,7 @@ public class Table : MonoBehaviour {
 		if((_location == LOCATION.MAINTRACK && _distance > TableBoard.Length) || (_location == LOCATION.CASTLE && _distance > 4)){
 			//this is outside the play area
 			//should pop and error message
-			Debug.Log("Move to: " + _location + " " + _distance + " is outside the play area, invalide move.");
+			Debug.Log("Move to: " + _location + " " + _distance + " is outside the play area, invalid move.");
 			return false;
 		}
 		//need to check the landing location of any pegs that was landed on
@@ -639,9 +639,9 @@ public class Table : MonoBehaviour {
 							return false;
 						}else{//not same player's pegs
 							if(_peg.Team == TableBoard.PlayersPegs[i,j].Team){//same team
-								return TestPegMove(TableBoard.PlayersPegs[i,j], LOCATION.MAINTRACK, TableBoard.GetPlayerCastleEntrance(i));
+								return TestPegMoveJoker(TableBoard.PlayersPegs[i,j], LOCATION.MAINTRACK, TableBoard.GetPlayerCastleEntrance(i));
 							}else{//not same team
-								PegToPlayerHome(TableBoard.PlayersPegs[i,j]);
+								//PegToPlayerHome(TableBoard.PlayersPegs[i,j]);
 								return true;
 							}
 						}
@@ -649,15 +649,47 @@ public class Table : MonoBehaviour {
 				}
 			}
 		}
+		return true;
+	}
+	public bool TestPegMove(Peg _peg, LOCATION _location, int _distance){
+		LOCATION beginningLocation = _peg.Location;
+		int beginningDistance = _peg.Distance;
+		
+		//need to check moving distances for valid position
+		if((_location == LOCATION.MAINTRACK && _distance > TableBoard.Length) || (_location == LOCATION.CASTLE && _distance > 4)){
+			//this is outside the play area
+			//should pop and error message
+			Debug.Log("Move to: " + _location + " " + _distance + " is outside the play area, invalid move.");
+			return false;
+		}
 		//need to check that we are not moving over any of our own pegs.
-		
-		
 		for(int i = 0; i < Players.Count; i++){
 			for(int j = 0; j < 5 /*the number of pegs a player has*/; j++){
 				//test each peg to see if its in that spot.
 				//this should be later optimized for specific cards or locations.
 				if(TableBoard.PlayersPegs[i,j].Location == _location){
 					
+				}
+			}
+		}
+		//need to check the landing location of any pegs that was landed on
+		if(_peg.Location == LOCATION.HOME && _location == LOCATION.MAINTRACK){
+			//check maintrack distance for any other peg
+			for(int i = 0; i < Players.Count; i++){
+				for(int j = 0; j < 5 /*the number of pegs a player has*/; j++){
+					//test each peg to see if its in that spot.
+					if(TableBoard.PlayersPegs[i,j].Location == _location && TableBoard.PlayersPegs[i,j].Distance == _distance){
+						if(_peg.Player == TableBoard.PlayersPegs[i,j].Player){
+							return false;
+						}else{//not same player's pegs
+							if(_peg.Team == TableBoard.PlayersPegs[i,j].Team){//same team
+								return TestPegMoveJoker(TableBoard.PlayersPegs[i,j], LOCATION.MAINTRACK, TableBoard.GetPlayerCastleEntrance(i));
+							}else{//not same team
+								//PegToPlayerHome(TableBoard.PlayersPegs[i,j]);
+								return true;
+							}
+						}
+					}
 				}
 			}
 		}
