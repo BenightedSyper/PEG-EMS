@@ -401,7 +401,7 @@ public class Table : MonoBehaviour {
 			MoveDescription = "Player: " + TurnCounter + " played an Ace on Peg: " + FirstPeg.Location + " " + FirstPeg.Distance + "\n";
 			if(FirstPeg.Location == LOCATION.HOME){
 				MoveToLocationFirst = LOCATION.MAINTRACK;
-				MoveToDistanceFirst = TableBoard.GetPlayerHomeExit(TurnCounter);
+				MoveToDistanceFirst = 0;
 				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 			}
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
@@ -409,7 +409,7 @@ public class Table : MonoBehaviour {
 				hSliderValue = GUI.HorizontalSlider(new Rect(25, (CARDHEIGHT + CARDBUFFER) * 2, 100, 30), hSliderValue, 0.0F, 1.0F);
 				CheckAceSlider();
 				MoveToLocationFirst = LOCATION.MAINTRACK;
-				MoveToDistanceFirst = (FirstPeg.Distance + (hSliderValue > 0 ? 11 : 1))% TableBoard.Length;
+				MoveToDistanceFirst = (hSliderValue > 0 ? 11 : 1);
 				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
 					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
@@ -422,7 +422,7 @@ public class Table : MonoBehaviour {
 			}
 			if(FirstPeg.Location == LOCATION.CASTLE){
 				MoveToLocationFirst = LOCATION.CASTLE;
-				MoveToDistanceFirst = FirstPeg.Distance + 1;
+				MoveToDistanceFirst = 1;
 			}
 			break;
 		case RANK.Two:
@@ -430,7 +430,7 @@ public class Table : MonoBehaviour {
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
 				MoveToLocationFirst = LOCATION.MAINTRACK;
-				MoveToDistanceFirst = (FirstPeg.Distance + 2 )% TableBoard.Length;
+				MoveToDistanceFirst = 2;
 				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
 					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
@@ -442,7 +442,7 @@ public class Table : MonoBehaviour {
 			}
 			if(FirstPeg.Location == LOCATION.CASTLE){
 				MoveToLocationFirst = LOCATION.CASTLE;
-				MoveToDistanceFirst = FirstPeg.Distance + 2;
+				MoveToDistanceFirst = 2;
 			}
 			break;
 		case RANK.Three:
@@ -450,7 +450,7 @@ public class Table : MonoBehaviour {
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
 				MoveToLocationFirst = LOCATION.MAINTRACK;
-				MoveToDistanceFirst = (FirstPeg.Distance + 3) % TableBoard.Length;
+				MoveToDistanceFirst = 3;
 				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
 					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
@@ -462,7 +462,7 @@ public class Table : MonoBehaviour {
 			}
 			if(FirstPeg.Location == LOCATION.CASTLE){
 				MoveToLocationFirst = LOCATION.CASTLE;
-				MoveToDistanceFirst = FirstPeg.Distance + 3;
+				MoveToDistanceFirst = 3;
 			}
 			break;
 		case RANK.Four:
@@ -470,7 +470,7 @@ public class Table : MonoBehaviour {
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
 				MoveToLocationFirst = LOCATION.MAINTRACK;
-				MoveToDistanceFirst = (FirstPeg.Distance + 4) % TableBoard.Length;
+				MoveToDistanceFirst = 4;
 				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
 					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
@@ -482,7 +482,7 @@ public class Table : MonoBehaviour {
 			}
 			if(FirstPeg.Location == LOCATION.CASTLE){
 				MoveToLocationFirst = LOCATION.CASTLE;
-				MoveToDistanceFirst = FirstPeg.Distance + 4;
+				MoveToDistanceFirst = 4;
 			}
 			break;
 		case RANK.Five:
@@ -490,7 +490,7 @@ public class Table : MonoBehaviour {
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
 				MoveToLocationFirst = LOCATION.MAINTRACK;
-				MoveToDistanceFirst = (FirstPeg.Distance + 5) % TableBoard.Length;
+				MoveToDistanceFirst = 5;
 				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
 					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
@@ -506,7 +506,7 @@ public class Table : MonoBehaviour {
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
 				MoveToLocationFirst = LOCATION.MAINTRACK;
-				MoveToDistanceFirst = (FirstPeg.Distance + 6) % TableBoard.Length;
+				MoveToDistanceFirst = 6;
 				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
 					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
@@ -524,10 +524,10 @@ public class Table : MonoBehaviour {
 			CheckSevenSlider();
 			
 			MoveDescription += "Moving Peg " + FirstPeg.Location + " " + FirstPeg.Distance + " Forward " + (int)hSliderSevenValue + "\n";
-			MoveToDistanceFirst = (FirstPeg.Distance + (int)hSliderSevenValue) % TableBoard.Length;
+			MoveToDistanceFirst = (int)hSliderSevenValue;
 			MoveToLocationFirst = LOCATION.MAINTRACK;
 			MoveDescription += "Moving Peg " + SecondPeg.Location + " " + SecondPeg.Distance + " Forward " + (7 - (int)hSliderSevenValue) + "\n";
-			MoveToDistanceSecond = (SecondPeg.Distance + (7 - (int)hSliderSevenValue)) % TableBoard.Length;
+			MoveToDistanceSecond = 7 - (int)hSliderSevenValue;
 			MoveToLocationFirst = LOCATION.MAINTRACK;
 			break;
 		case RANK.Eight:
@@ -535,7 +535,7 @@ public class Table : MonoBehaviour {
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
 				MoveToLocationFirst = LOCATION.MAINTRACK;
-				MoveToDistanceFirst = (FirstPeg.Distance + (TableBoard.Length - 8)) % TableBoard.Length;
+				MoveToDistanceFirst = -8;
 				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 			}
 			break;
@@ -550,10 +550,10 @@ public class Table : MonoBehaviour {
 			NineToggle = GUI.Toggle(new Rect (25, (CARDHEIGHT + CARDBUFFER) * 2 + 30, 100, 30), NineToggle, (NineToggle?"Forward/Backward":"Backward/Forward"));
 			
 			MoveDescription += "Moving Peg " + FirstPeg.Location + " " + FirstPeg.Distance + (NineToggle? " Forward ": " Backwards ") + hSliderNineValue + "\n";
-			MoveToDistanceFirst = FirstPeg.Distance + (NineToggle? (int)hSliderNineValue : -(int)hSliderNineValue );
+			MoveToDistanceFirst = (NineToggle? (int)hSliderNineValue : -(int)hSliderNineValue );
 			MoveToLocationFirst = LOCATION.MAINTRACK;
 			MoveDescription += "Moving Peg " + SecondPeg.Location + " " + SecondPeg.Distance + (NineToggle? " Backwards ": " Forward ") + (9 - hSliderNineValue) + "\n";
-			MoveToDistanceSecond = SecondPeg.Distance + (NineToggle? -(9 - (int)hSliderNineValue): (9 - (int)hSliderNineValue) );
+			MoveToDistanceSecond = (NineToggle? -(9 - (int)hSliderNineValue): (9 - (int)hSliderNineValue) );
 			MoveToLocationSecond = LOCATION.MAINTRACK;
 			
 			break;
@@ -569,10 +569,10 @@ public class Table : MonoBehaviour {
 			TenSecondToggle = GUI.Toggle(new Rect (25, (CARDHEIGHT + CARDBUFFER) * 2 + 60, 100, 30), TenSecondToggle, (TenSecondToggle?"Forward":"Backward"));
 			
 			MoveDescription += "Moving Peg " + FirstPeg.Location + " " + FirstPeg.Distance + (TenFirstToggle? " Forward " : " Backwards ") + hSliderTenValue + "\n";
-			MoveToDistanceFirst = FirstPeg.Distance + (TenFirstToggle? (int)hSliderTenValue : -(int)hSliderTenValue);
+			MoveToDistanceFirst = (TenFirstToggle? (int)hSliderTenValue : -(int)hSliderTenValue);
 			MoveToLocationFirst = LOCATION.MAINTRACK;
 			MoveDescription += "Moving Peg " + SecondPeg.Location + " " + SecondPeg.Distance + (TenSecondToggle? " Forward " : " Backwards ") + (10 - hSliderTenValue) + "\n";
-			MoveToDistanceSecond = SecondPeg.Distance + (TenSecondToggle? (10 - (int)hSliderTenValue) : -(10 - (int)hSliderTenValue));
+			MoveToDistanceSecond = (TenSecondToggle? (10 - (int)hSliderTenValue) : -(10 - (int)hSliderTenValue));
 			MoveToLocationSecond = LOCATION.MAINTRACK;
 			
 			break;
@@ -588,7 +588,7 @@ public class Table : MonoBehaviour {
 			if(FirstPeg.Location == LOCATION.MAINTRACK){
 				//2 spaces Forward
 				MoveToLocationFirst = LOCATION.MAINTRACK;
-				MoveToDistanceFirst = (FirstPeg.Distance + 10) % TableBoard.Length;
+				MoveToDistanceFirst = 10;
 				MoveDescription += "moving to " + MoveToLocationFirst + " " + MoveToDistanceFirst;
 				if( FirstPeg.Distance < TableBoard.GetPlayerCastleEntrance(TurnCounter) 
 					&& MoveToDistanceFirst > TableBoard.GetPlayerCastleEntrance(TurnCounter) 
@@ -629,21 +629,19 @@ public class Table : MonoBehaviour {
 			return false;
 		}
 		//need to check the landing location of any pegs that was landed on
-		if(_peg.Location == LOCATION.HOME && _location == LOCATION.MAINTRACK){
-			//check maintrack distance for any other peg
-			for(int i = 0; i < Players.Count; i++){
-				for(int j = 0; j < 5 /*the number of pegs a player has*/; j++){
-					//test each peg to see if its in that spot.
-					if(TableBoard.PlayersPegs[i,j].Location == _location && TableBoard.PlayersPegs[i,j].Distance == _distance){
-						if(_peg.Player == TableBoard.PlayersPegs[i,j].Player){
-							return false;
-						}else{//not same player's pegs
-							if(_peg.Team == TableBoard.PlayersPegs[i,j].Team){//same team
-								return TestPegMoveJoker(TableBoard.PlayersPegs[i,j], LOCATION.MAINTRACK, TableBoard.GetPlayerCastleEntrance(i));
-							}else{//not same team
-								//PegToPlayerHome(TableBoard.PlayersPegs[i,j]);
-								return true;
-							}
+		//check maintrack distance for any other peg
+		for(int i = 0; i < Players.Count; i++){
+			for(int j = 0; j < 5 /*the number of pegs a player has*/; j++){
+				//test each peg to see if its in that spot.
+				if(TableBoard.PlayersPegs[i,j].Location == _location && TableBoard.PlayersPegs[i,j].Distance == _distance){
+					if(_peg.Player == TableBoard.PlayersPegs[i,j].Player){
+						return false;
+					}else{//not same player's pegs
+						if(_peg.Team == TableBoard.PlayersPegs[i,j].Team){//same team
+							return TestPegMoveJoker(TableBoard.PlayersPegs[i,j], LOCATION.MAINTRACK, TableBoard.GetPlayerCastleEntrance(i));
+						}else{//not same team
+							//PegToPlayerHome(TableBoard.PlayersPegs[i,j]);
+							return true;
 						}
 					}
 				}
@@ -663,35 +661,11 @@ public class Table : MonoBehaviour {
 			return false;
 		}
 		//need to check that we are not moving over any of our own pegs.
-		for(int i = 0; i < Players.Count; i++){
-			for(int j = 0; j < 5 /*the number of pegs a player has*/; j++){
-				//test each peg to see if its in that spot.
-				//this should be later optimized for specific cards or locations.
-				if(TableBoard.PlayersPegs[i,j].Location == _location){
-					
-				}
+		for(int i = 0; i < 5 /**/; i++){
+			if(TableBoard.PlayersPegs[_peg.Player,i].Location == _location){
+				
 			}
-		}
-		//need to check the landing location of any pegs that was landed on
-		if(_peg.Location == LOCATION.HOME && _location == LOCATION.MAINTRACK){
-			//check maintrack distance for any other peg
-			for(int i = 0; i < Players.Count; i++){
-				for(int j = 0; j < 5 /*the number of pegs a player has*/; j++){
-					//test each peg to see if its in that spot.
-					if(TableBoard.PlayersPegs[i,j].Location == _location && TableBoard.PlayersPegs[i,j].Distance == _distance){
-						if(_peg.Player == TableBoard.PlayersPegs[i,j].Player){
-							return false;
-						}else{//not same player's pegs
-							if(_peg.Team == TableBoard.PlayersPegs[i,j].Team){//same team
-								return TestPegMoveJoker(TableBoard.PlayersPegs[i,j], LOCATION.MAINTRACK, TableBoard.GetPlayerCastleEntrance(i));
-							}else{//not same team
-								//PegToPlayerHome(TableBoard.PlayersPegs[i,j]);
-								return true;
-							}
-						}
-					}
-				}
-			}
+			
 		}
 		return true;
 	}
