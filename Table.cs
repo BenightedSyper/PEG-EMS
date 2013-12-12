@@ -617,7 +617,7 @@ public class Table : MonoBehaviour {
 		_peg.Location = LOCATION.HOME;
 		_peg.Distance = _peg.Number;
 	}
-	public bool TestPegMoveJoker(Peg _peg, LOCATION _location, int _distance){
+	public bool TestPegLand(Peg _peg, LOCATION _location, int _distance){
 		LOCATION beginningLocation = _peg.Location;
 		int beginningDistance = _peg.Distance;
 		
@@ -638,7 +638,7 @@ public class Table : MonoBehaviour {
 						return false;
 					}else{//not same player's pegs
 						if(_peg.Team == TableBoard.PlayersPegs[i,j].Team){//same team
-							return TestPegMoveJoker(TableBoard.PlayersPegs[i,j], LOCATION.MAINTRACK, TableBoard.GetPlayerCastleEntrance(i));
+							return TestPegLand(TableBoard.PlayersPegs[i,j], LOCATION.MAINTRACK, TableBoard.GetPlayerCastleEntrance(i));
 						}else{//not same team
 							//PegToPlayerHome(TableBoard.PlayersPegs[i,j]);
 							return true;
